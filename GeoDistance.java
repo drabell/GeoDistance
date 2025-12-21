@@ -1,9 +1,8 @@
-
 /******************************************************************************
  Module         : GeoDistance.java |Class Lib
  Description    : Methods to calculate the great circle (orthodromic) distance
                 : between two geo-points on Earth
- Version        : 17.1.001
+ Version        : 21.1.001
  ------------------------------------------------------------------------------
  Copyright      :  2011-2025 Alexander Bell
 -------------------------------------------------------------------------------
@@ -79,11 +78,11 @@ public class GeoDistance {
             double _b = Math.sin(Math.toRadians((Lon2 - Lon1)/2));
             _b *= _b * Math.cos(φ1) * Math.cos(φ2);
 
-            // central angle, aka arc segment angular distance
-            double _ca = 2* Math.asin(Math.sqrt(_a + _b));
+            // central angle θ, aka arc segment angular distance
+            double θ = 2* Math.asin(Math.sqrt(_a + _b));
 
             // great-circle (orthodromic) distance, km/miles
-            return _ca * (Unit == Units.SI? 1:1/ mi2km) * meanRadius;
+            return θ * (Unit == Units.SI? 1:1/ mi2km) * meanRadius;
         }
         catch( Exception e) { return -1; } // indicates error
     }
@@ -112,12 +111,12 @@ public class GeoDistance {
             double φ2 = Math.toRadians(Lat2); // Lat2;
             double Δλ = Math.toRadians(Lon1-Lon2); // delta Lon;
 
-            // central angle, aka arc segment angular distance
-            double _ca = Math.acos(Math.sin(φ1) * Math.sin(φ2) +
+            // central angle θ, aka arc segment angular distance
+            double θ = Math.acos(Math.sin(φ1) * Math.sin(φ2) +
                     Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ));
 
             // great-circle (orthodromic) distance, km/miles
-            return _ca * (Unit == Units.SI? 1:1/ mi2km) * meanRadius;
+            return θ * (Unit == Units.SI? 1:1/ mi2km) * meanRadius;
         }
         catch( Exception e) { return -1; } // indicates error
     }
@@ -162,7 +161,7 @@ public class GeoDistance {
         try {
             // Convert to radians
             double φ1 = Math.toRadians(Lat1), φ2 = Math.toRadians(Lat2);
-            double ΔλInit = Math.toRadians(Lon2 - Lon1);
+            double Δλ = Math.toRadians(Lon2 - Lon1);
 
             // Reduced latitudes
             double U1 = Math.atan((1 - f) * Math.tan(φ1));
@@ -171,7 +170,7 @@ public class GeoDistance {
             double sinU1 = Math.sin(U1), cosU1 = Math.cos(U1);
             double sinU2 = Math.sin(U2), cosU2 = Math.cos(U2);
 
-            double λ = ΔλInit;
+            double λ = Δλ;
             double λPrev;
             double iterLimit = 100;
             double ε = 1e-12;
@@ -211,7 +210,7 @@ public class GeoDistance {
                 double C = (f / 16.0) * cos2α * (4.0 + f * (4.0 - 3.0 * cos2α));
 
                 λPrev = λ;
-                λ = ΔλInit + (1.0 - C) * f * sinα *
+                λ = Δλ + (1.0 - C) * f * sinα *
                         (σ + C * sinσ * (cos2σm + C * cosσ * (-1.0 + 2.0 * cos2σm2)));
 
                 if (Math.abs(λ - λPrev) < ε) break;
@@ -246,7 +245,7 @@ public class GeoDistance {
     /// suitable for small distances (e.g., within a city or small region);
     /// it is shown mostly for a didactic purpose. For higher accuracy over
     /// longer distances, use either Haversine, or Spherical Law of Cosines,
-    // or Inverse Vincenty methods (the latter provides the highest accuracy).
+    /// or Inverse Vincenty methods (the latter provides the highest accuracy).
     /// </summary>
     /// <param name="Lat1">double: 1st point Latitude</param>
     /// <param name="Lon1">double: 1st point Longitude</param>
@@ -260,15 +259,15 @@ public class GeoDistance {
             // convert to radians
             double φ1 = Math.toRadians(Lat1);
             double φ2 = Math.toRadians(Lat2);
-            double Δλ = Math.toRadians(Lat2 - Lat1);
+            double Δφ = Math.toRadians(Lat2 - Lat1);
 
             double _a = Math.toRadians((Lon2 - Lon1) * Math.cos((φ1 + φ2) / 2));
 
-            // central angle (arc segment angular distance)
-            double _ca = Math.sqrt(_a * _a + Δλ * Δλ);
+            // central angle θ (arc segment angular distance)
+            double θ = Math.sqrt(_a * _a + Δφ * Δφ);
 
             // great-circle (orthodromic) distance, km/miles
-            return _ca * (UnitSys == Units.SI ? 1 : 1 / mi2km) * meanRadius;
+            return θ * (UnitSys == Units.SI ? 1 : 1 / mi2km) * meanRadius;
         }
         catch( Exception e) { return -1; } // indicates error
     }
